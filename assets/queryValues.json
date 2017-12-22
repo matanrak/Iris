@@ -1,0 +1,21 @@
+{
+
+  "weather": {
+
+    "linkCurrentByCityID": "http://api.openweathermap.org/data/2.5/weather?id=%APPID=%",
+    "key": "d2800fadbc4aeef2e2ea854645dc34e2",
+    "defaultID": "293397",
+
+    "sentencesCurrent": [
+      "The weather in ? is currently ?",
+      "The weather in ? seems to be ?",
+      "Currentlty, The weather in ? is ?"
+    ],
+
+    "sentencesUpcomming": [
+      "This week the weather in ? seems to be ?"
+    ]
+
+  }
+
+}
