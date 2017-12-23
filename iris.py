@@ -1,7 +1,7 @@
 import os
 import json
 import socket
-import weather
+import query
 import server
 from sys import platform
 from selenium import webdriver
@@ -35,7 +35,7 @@ class Iris:
         self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
 
         print(self.queryValuesFile["weather"]["key"])
-        weather.WeatherHandler().getCurrentWeather(self.queryValuesFile["weather"])
+        query.QueryHandler().getJSON(self.queryValuesFile["weather"], 0)
 
 
         server.Server().listen()

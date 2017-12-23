@@ -1,0 +1,30 @@
+{
+
+  "weather": {
+
+    "url": "http://api.openweathermap.org/data/2.5/weather?id=%sAPPID=%s",
+    "key": "d2800fadbc4aeef2e2ea854645dc34e2",
+    "defaultID": "293397",
+
+    "urls": [
+      {"name" : "By city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%sAPPID=%s"}
+    ],
+
+    "urlFillings": [
+      "json?defaultID",
+      "json?key"
+    ],
+
+    "sentencesCurrent": [
+      "The weather in ? is currently ?",
+      "The weather in ? seems to be ?",
+      "Currentlty, The weather in ? is ?"
+    ],
+
+    "sentencesUpcomming": [
+      "This week the weather in ? seems to be ?"
+    ]
+
+  }
+
+}
