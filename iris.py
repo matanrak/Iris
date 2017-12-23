@@ -9,13 +9,11 @@ from selenium import webdriver
 
 class Iris:
 
-
     driver = object()
     server_host = 'localhost'
     server_port = 8000
 
     queryValuesFile = object()
-
 
     def __init__(self):
 
@@ -32,10 +30,9 @@ class Iris:
             print 'OS NOT COMPATIBLE, STOPPING SERVER.'
             exit()
 
-        self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
+        #self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
 
-        print(self.queryValuesFile["weather"]["key"])
-        query.QueryHandler().getJSON(self.queryValuesFile["weather"], 0)
+        query.QueryHandler.get_json(self.queryValuesFile["weather"], 0)
 
 
         server.Server().listen()
@@ -44,8 +41,6 @@ class Iris:
         #print(text)
         #print(self.is_query(json.loads(self.fetch_from_nlp(text))))
         #tree = json["sentences"][0]["collapsed-dependencies"]
-
-
 
     def fetch_from_nlp(self, text):
 
@@ -62,9 +57,8 @@ class Iris:
         self.driver.close()
         return json_text
 
-
-
-    def is_query(self, json):
+    @staticmethod
+    def is_query(json):
 
         if json["sentences"][0]["tokens"][0]["word"].lower() == "the":
             return False
@@ -75,12 +69,10 @@ class Iris:
                     return False
 
         for obj in json["sentences"][0]["collapsed-dependencies"]:
-            if(obj["dep"].lower() == "expl"):
+            if obj["dep"].lower() == "expl":
                 return False
 
         return True
-
-
 
 
 Iris()
