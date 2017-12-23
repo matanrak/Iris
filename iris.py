@@ -30,12 +30,13 @@ class Iris:
             print 'OS NOT COMPATIBLE, STOPPING SERVER.'
             exit()
 
-        #self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
+        self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
+
 
         query.QueryHandler.get_json(self.queryValuesFile["weather"], 0)
 
-
         server.Server().listen()
+
 
         #text = 'Is the weather nice?'
         #print(text)

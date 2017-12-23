@@ -10,6 +10,11 @@
       {"name" : "Weekly by city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"}
     ],
 
+    "answerPath": [
+      "main",
+      "temp"
+    ],
+
     "buildUrl": [
       "json?defaultID",
       "&",
@@ -17,7 +22,9 @@
     ],
 
     "actionsOnOutput": [
-      "math?int(n / 10)",
+      "math?float(n)",
+      "math?round(n)",
+      "math?float(n / 10)",
       "command?buildAnswer",
       "command?sendBack"
     ],

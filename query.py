@@ -1,6 +1,6 @@
 import json
 import random
-
+import urllib
 
 class QueryHandler():
 
@@ -13,9 +13,8 @@ class QueryHandler():
         url_fillings = QueryHandler.follow_instructions(values, QueryHandler.instruction_translator(values["buildUrl"]))
         url = url_base % tuple(url_fillings)
 
-        print ("url: ", url)
-
-        n = 100
+        response = json.loads(urllib.urlopen(url).read())
+        n = QueryHandler.follow_instructions_fromlist(response, QueryHandler.instruction_translator(values["answerPath"]))
 
         for action in values["actionsOnOutput"]:
 
@@ -28,7 +27,7 @@ class QueryHandler():
 
                 elif command == "sendBack":
                     print ("sent back")
-                    # Will send the info back to the requester
+                    # TODO Will send the info back to the requester
 
             elif json.dumps(action).__contains__("math?"):
                 n = eval(str(json.dumps(action)).replace("math?", "").replace('"', ""))
@@ -36,26 +35,32 @@ class QueryHandler():
         print (answer)
 
     @staticmethod
-    def follow_instructions(data, instructions):
+    def follow_instructions_fromlist(data, instruction):
+        instruction_data = json.loads(json.dumps(data))
 
+        for path in range(len(instruction)):
+            instruction_path = object()
+
+            try:
+                int(instruction[path])
+                instruction_path = int(instruction[path])
+            except ValueError:
+                instruction_path = str(instruction[path])
+
+            if path == len(instruction) - 1:
+                return json.dumps(instruction_data[instruction_path]).strip('"')
+            else:
+                instruction_data = json.loads(json.dumps(instruction_data))[instruction_path]
+
+        return "Could'nt follow json instructions"
+
+    @staticmethod
+    def follow_instructions(data, instructions):
         fillings = []
 
         for instruction in instructions:
             if isinstance(instruction, list):
-                instruction_data = json.loads(json.dumps(data))
-                for path in range(len(instruction)):
-
-                    instruction_path = object()
-                    try:
-                        int(instruction[path])
-                        instruction_path = int(instruction[path])
-                    except ValueError:
-                        instruction_path = str(instruction[path])
-
-                    if path == len(instruction) - 1:
-                        fillings.append(json.dumps(instruction_data[instruction_path]).strip('"'))
-                    else:
-                        instruction_data = json.loads(json.dumps(instruction_data))[instruction_path]
+                fillings.append(QueryHandler.follow_instructions_fromlist(data, instruction))
             else:
                 fillings.append(instruction)
 
@@ -71,7 +76,7 @@ class QueryHandler():
 
             return instructions
 
-        elif json.dumps(data).__contains__("{"):  # For some reason the is_json is currently acting up, TO DO
+        elif json.dumps(data).__contains__("{"):  # TODO For some reason the is_json is currently acting up
             value_json = json.loads(json.dumps(data))
 
             for json_object in value_json:
