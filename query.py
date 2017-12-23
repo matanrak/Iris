@@ -1,5 +1,5 @@
 import json
-import urllib
+import random
 
 
 class QueryHandler():
@@ -7,11 +7,33 @@ class QueryHandler():
     @staticmethod
     def get_json(values, type):
 
+        answer = "UNKNOWN"
+
         url_base = values["urls"][type]["url"]
         url_fillings = QueryHandler.follow_instructions(values, QueryHandler.instruction_translator(values["buildUrl"]))
         url = url_base % tuple(url_fillings)
 
-        print "url: ", url
+        print ("url: ", url)
+
+        n = 100
+
+        for action in values["actionsOnOutput"]:
+
+            if json.dumps(action).__contains__("command?"):
+                command = str(json.dumps(action)).replace("command?", "").replace('"', "")
+
+                if command == "buildAnswer":
+                    answer_base = random.choice(list(values["answers"][type]["sentences"]))
+                    answer = answer_base % ("N/A City", str(n))
+
+                elif command == "sendBack":
+                    print ("sent back")
+                    # Will send the info back to the requester
+
+            elif json.dumps(action).__contains__("math?"):
+                n = eval(str(json.dumps(action)).replace("math?", "").replace('"', ""))
+
+        print (answer)
 
     @staticmethod
     def follow_instructions(data, instructions):

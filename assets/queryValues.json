@@ -6,7 +6,8 @@
     "defaultID": "293397",
 
     "urls": [
-      {"name" : "By city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"}
+      {"name" : "Current by city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"},
+      {"name" : "Weekly by city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"}
     ],
 
     "buildUrl": [
@@ -15,16 +16,24 @@
       "json?key"
     ],
 
-    "sentencesCurrent": [
-      "The weather in %s is currently %s",
-      "The weather in %s seems to be %s",
-      "Currentlty, The weather in ? is %s"
+    "actionsOnOutput": [
+      "math?int(n / 10)",
+      "command?buildAnswer",
+      "command?sendBack"
     ],
 
-    "sentencesUpcomming": [
-      "This week the weather in %s seems to be %s"
+    "answers": [
+
+      {"sentences": [
+        "The weather in %s is currently %s",
+        "The weather in %s seems to be %s",
+        "Currentlty, The weather in %s is %s"
+      ]},
+
+      {"sentences": [
+        "This week the weather in %s seems to be %s"
+      ]}
     ]
 
   }
-
 }
