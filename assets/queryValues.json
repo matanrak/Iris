@@ -1,46 +1,107 @@
 {
+  "questions":
+    [
+      {
+        "alias": [
+          "joke",
+          "funny",
+          "humor"
+        ],
 
-  "weather": {
+        "type": "command",
 
-    "key": "d2800fadbc4aeef2e2ea854645dc34e2",
-    "defaultID": "293397",
+        "urls": [
+          {
+            "name": "Current by city ID",
+            "url": "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/%s"
+          }
+        ],
+        "answerPath": [
+          [
+            "setup"
+          ],
+          [
+            "punchline"
+          ]
+        ],
 
-    "urls": [
-      {"name" : "Current by city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"},
-      {"name" : "Weekly by city ID", "url" : "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"}
-    ],
+        "buildUrl": [
+          "random_joke"
+        ],
 
-    "answerPath": [
-      "main",
-      "temp"
-    ],
+        "actionsOnOutput": [
+          "command?buildAnswer",
+          "command?sendBack"
+        ],
 
-    "buildUrl": [
-      "json?defaultID",
-      "&",
-      "json?key"
-    ],
+        "answers": [
+          {
+            "sentences": [
+              "%s %s"
+            ]
+          }
+        ]
+      },
 
-    "actionsOnOutput": [
-      "math?float(n)",
-      "math?round(n)",
-      "math?float(n / 10)",
-      "command?buildAnswer",
-      "command?sendBack"
-    ],
+      {
+        "alias": [
+          "weather",
+          "temperature",
+          "look"
+        ],
 
-    "answers": [
+        "type": "question",
+        "key": "d2800fadbc4aeef2e2ea854645dc34e2",
+        "defaultID": "293397",
 
-      {"sentences": [
-        "The weather in %s is currently %s",
-        "The weather in %s seems to be %s",
-        "Currentlty, The weather in %s is %s"
-      ]},
+        "urls": [
+          {
+            "name": "Current by city ID",
+            "url": "http://api.openweathermap.org/data/2.5/weather?id=%s%sAPPID=%s"
+          },
+          {
+            "name": "Weekly by city ID",
+            "url": "TO BE ADDED"
+          }
+        ],
 
-      {"sentences": [
-        "This week the weather in %s seems to be %s"
-      ]}
+        "answerPath": [
+          [
+              "main",
+              "temp"
+          ]
+        ],
+
+        "buildUrl": [
+          "json?defaultID",
+          "&",
+          "json?key"
+        ],
+
+        "actionsOnOutput": [
+          "n = answers[0]",
+          "math?float(n)",
+          "math?round(n)",
+          "math?float(n / 10)",
+          "command?buildAnswer",
+          "command?sendBack"
+        ],
+
+        "answers": [
+          {
+            "sentences": [
+              "The weather is currently %s",
+              "The weather seems to be %s",
+              "Currently, The temperature is %s"
+            ]
+          },
+          {
+            "sentences": [
+              "This week the weather in %s seems to be %s"
+            ]
+          }
+        ]
+      }
+
     ]
-
-  }
 }

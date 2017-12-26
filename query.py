@@ -5,7 +5,7 @@ import urllib
 class QueryHandler():
 
     @staticmethod
-    def get_json(values, type):
+    def get_json(values, type, location):
 
         answer = "UNKNOWN"
 
@@ -14,24 +14,30 @@ class QueryHandler():
         url = url_base % tuple(url_fillings)
 
         response = json.loads(urllib.urlopen(url).read())
-        n = QueryHandler.follow_instructions_fromlist(response, QueryHandler.instruction_translator(values["answerPath"]))
+
+        n = 0
+        answers = []
+
+        for path in values["answerPath"]:
+            answers.append(QueryHandler.follow_instructions_fromlist(response, QueryHandler.instruction_translator(path)))
 
         for action in values["actionsOnOutput"]:
 
-            if json.dumps(action).__contains__("command?"):
+            if json.dumps(action).__contains__("math?"):
+                n = eval(str(json.dumps(action)).replace("math?", "").replace('"', ""))
+
+            elif json.dumps(action).__contains__("command?"):
                 command = str(json.dumps(action)).replace("command?", "").replace('"', "")
 
                 if command == "buildAnswer":
                     answer_base = random.choice(list(values["answers"][type]["sentences"]))
-                    answer = answer_base % ("N/A City", str(n))
+                    answer = answer_base % tuple(answers)
 
                 elif command == "sendBack":
                     print ("sent back")
                     # TODO Will send the info back to the requester
 
-            elif json.dumps(action).__contains__("math?"):
-                n = eval(str(json.dumps(action)).replace("math?", "").replace('"', ""))
-
+        print n
         print (answer)
 
     @staticmethod
