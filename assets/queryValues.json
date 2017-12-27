@@ -1,6 +1,64 @@
 {
   "questions":
     [
+
+
+
+
+
+      {
+        "alias": [
+          "news",
+          "up"
+        ],
+
+        "type": "question",
+        "key": "19fa6448b4a14f87a2ba6aaf8e964741",
+        "source": "bbc-news",
+
+        "urls": [
+          {
+            "name": "News from the defined source",
+            "url": "https://newsapi.org/v2/top-headlines?sources=%s&apiKey=%s"
+          }
+        ],
+
+        "answerPath": [
+          [
+            "articles",
+            "0",
+            "author"
+          ],
+          [
+            "articles",
+            "random?8",
+            "title"
+          ]
+        ],
+
+        "buildUrl": [
+          "json?source",
+          "json?key"
+        ],
+
+        "actionsOnOutput": [
+          "command?buildAnswer",
+          "command?sendBack"
+        ],
+
+        "answers": [
+          {
+            "sentences": [
+              "%s : %s"
+            ]
+          }
+        ]
+      },
+
+
+
+
+
       {
         "alias": [
           "joke",
@@ -12,10 +70,11 @@
 
         "urls": [
           {
-            "name": "Current by city ID",
+            "name": "Fetch random joke",
             "url": "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/%s"
           }
         ],
+
         "answerPath": [
           [
             "setup"
@@ -42,6 +101,11 @@
           }
         ]
       },
+
+
+
+
+
 
       {
         "alias": [
@@ -102,6 +166,10 @@
           }
         ]
       }
+
+
+
+
 
     ]
 }

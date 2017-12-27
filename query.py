@@ -1,13 +1,16 @@
 import json
 import random
 import urllib
+from random import randint
 
 class QueryHandler():
 
     @staticmethod
     def get_json(values, type, location):
 
+        answers = []
         answer = "UNKNOWN"
+        n = 0
 
         url_base = values["urls"][type]["url"]
         url_fillings = QueryHandler.follow_instructions(values, QueryHandler.instruction_translator(values["buildUrl"]))
@@ -15,18 +18,17 @@ class QueryHandler():
 
         response = json.loads(urllib.urlopen(url).read())
 
-        n = 0
-        answers = []
+        for path in values["answerPath"]:  # This gets the answer from the response using the json answerPath
+            translated_instructions = QueryHandler.instruction_translator(path)
+            answer_in_path = QueryHandler.follow_instructions_fromlist(response, translated_innstructions)
+            answers.append(answer_in_path)
 
-        for path in values["answerPath"]:
-            answers.append(QueryHandler.follow_instructions_fromlist(response, QueryHandler.instruction_translator(path)))
+        for action in values["actionsOnOutput"]:  # This preforms the actions that are specified in actionsOnOutput
 
-        for action in values["actionsOnOutput"]:
-
-            if json.dumps(action).__contains__("math?"):
+            if json.dumps(action).__contains__("math?"):  # Checks if the action is a math function
                 n = eval(str(json.dumps(action)).replace("math?", "").replace('"', ""))
 
-            elif json.dumps(action).__contains__("command?"):
+            elif json.dumps(action).__contains__("command?"):  # Checks if the action is a kind of command
                 command = str(json.dumps(action)).replace("command?", "").replace('"', "")
 
                 if command == "buildAnswer":
@@ -41,7 +43,7 @@ class QueryHandler():
         print (answer)
 
     @staticmethod
-    def follow_instructions_fromlist(data, instruction):
+    def follow_instructions_fromlist(data, instruction): # follow_instructions_fromlist follows translated instructions
         instruction_data = json.loads(json.dumps(data))
 
         for path in range(len(instruction)):
@@ -61,7 +63,7 @@ class QueryHandler():
         return "Could'nt follow json instructions"
 
     @staticmethod
-    def follow_instructions(data, instructions):
+    def follow_instructions(data, instructions):  # follow_instructions is an extension of fromlist, it returns an array
         fillings = []
 
         for instruction in instructions:
@@ -76,13 +78,13 @@ class QueryHandler():
     def instruction_translator(data):
         instructions = []
 
-        if isinstance(data, list):
+        if isinstance(data, list):  # Checks if the object is a list, and if so builds a list of instructions from it
             for s in data:
                 instructions.append(QueryHandler.instruction_translator(s))
 
             return instructions
 
-        elif json.dumps(data).__contains__("{"):  # TODO For some reason the is_json is currently acting up
+        elif json.dumps(data).__contains__("{"):  # Checks if the object is more json, and parses it accordingly
             value_json = json.loads(json.dumps(data))
 
             for json_object in value_json:
@@ -94,18 +96,15 @@ class QueryHandler():
 
             return instructions
 
-        elif isinstance(data, int):
+        elif isinstance(data, int):  # Checks if the object is an int, mostly for use in arrays
             return [data]
 
-        if json.dumps(data).__contains__("json?"):
+        if json.dumps(data).__contains__("json?"): # Checks if the object is a json instruction
             return [json.dumps(data).replace("json?", "").strip('"')]
 
-        return json.dumps(data).strip('"')
+        if json.dumps(data).__contains__("random?"):  # Checks if the object is random number, and if so generates one
+            print "NUMM: ", json.dumps(data)
+            num = int([json.dumps(data).replace("random?", "").strip('"')]) or 9
+            return random.randint(0, num)
 
-    @staticmethod
-    def is_json(data):
-        try:
-            json.loads(data)
-        except ValueError:
-            return False
-        return True
+        return json.dumps(data).strip('"')

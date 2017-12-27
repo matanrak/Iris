@@ -37,7 +37,7 @@ class Iris:
         # main_entity = Iris.main_entity(data)
         # print "JAAASOw2N: ", Iris.json_file["questions"][0]["weather"]
 
-        data = json.loads(self.fetch_from_nlp("How is the weather?"))
+        data = json.loads(self.fetch_from_nlp("Tell me the news"))
         main_entity = Iris.main_entity(data)
         query_file = None
 
