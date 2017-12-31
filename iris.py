@@ -18,37 +18,34 @@ class Iris:
 
     def __init__(self):
 
+        # This heap of code checks for the os and sets the driver + query file path accordingly
         if platform == "darwin":
-            self.driver = webdriver.Chrome(os.path.realpath('assets/chromedriver_mac'))
+            Iris.driver = webdriver.Chrome(os.path.realpath('assets/chromedriver_mac'))
             Iris.json_file = json.load(open('assets/queryValues.json'))
         elif platform == "linux" or platform == "linux2":
-            self.driver = webdriver.Chrome(os.path.realpath('assets/chromedriver_linux'))
+            Iris.driver = webdriver.Chrome(os.path.realpath('assets/chromedriver_linux'))
             Iris.json_file = json.load(open('assets/queryValues.json'))
         elif platform == "win32":
-            self.driver = webdriver.Chrome(os.path.realpath('assets\chromedriver_win.exe'))
+            Iris.driver = webdriver.Chrome(os.path.realpath('assets\chromedriver_win.exe'))
             Iris.json_file = json.load(open('assets\queryValues.json'))
         else:
             print 'OS NOT COMPATIBLE, STOPPING SERVER.'
             exit()
 
-        self.driver.get('http://nlp.stanford.edu:8080/corenlp/process')
+        while True:
+            Iris.get_answer(raw_input("Ask user for something."))
 
-        # query.QueryHandler.get_json(self.json_file["questions"][0], 0)
-        # main_entity = Iris.main_entity(data)
-        # print "JAAASOw2N: ", Iris.json_file["questions"][0]["weather"]
 
-        data = json.loads(self.fetch_from_nlp("Tell me the news"))
+        Iris.driver.close()
+        server.Server().listen()
+
+    @staticmethod
+    def get_answer(text):
+        Iris.driver.restart()
+
+        data = json.loads(Iris.fetch_from_nlp(text))
         main_entity = Iris.main_entity(data)
-        query_file = None
-
-        print "Main: ", main_entity
-
-
-        if Iris.is_query(data):
-            query_file = Iris.get_query_file(main_entity)
-            print "Is query"
-        else:
-            print "Isn't query"
+        query_file = query_file = Iris.get_query_file(main_entity)
 
         if query_file is not None:
             if Iris.get_location(data) is not None:
@@ -58,21 +55,17 @@ class Iris:
         else:
             "Invalid query"
 
-        server.Server().listen()
 
-    def fetch_from_nlp(self, text):
-
-        element_select = self.driver.find_element_by_name('outputFormat')
+    @staticmethod
+    def fetch_from_nlp(text):
+        element_select = Iris.driver.find_element_by_name('outputFormat')
         element_select.send_keys('json')
-        element_text = self.driver.find_element_by_name('input')
+        element_text = Iris.driver.find_element_by_name('input')
         element_text.send_keys(text)
         element_text.submit()
-        element_out = self.driver.find_element_by_css_selector('pre')
+        element_out = Iris.driver.find_element_by_css_selector('pre')
 
-        json_text = element_out.text
-
-        self.driver.close()
-        return json_text
+        return element_out.text
 
     @staticmethod
     def is_query(data):

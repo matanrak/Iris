@@ -154,9 +154,9 @@
         "answers": [
           {
             "sentences": [
-              "The weather is currently %s",
-              "The weather seems to be %s",
-              "Currently, The temperature is %s"
+              "The weather is currently %s degrees",
+              "The weather seems to be %s degrees",
+              "Currently, The temperature is %s degrees"
             ]
           },
           {
