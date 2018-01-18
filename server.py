@@ -33,6 +33,8 @@ class Server(object):
         while True:
             try:
                 data = client.recv(1024)
+
+                Iris.get_answer(data.decode())
                 print data.decode()
 
                 client.close()

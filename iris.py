@@ -1,8 +1,6 @@
 import os
 import json
-import socket
 import query
-import pprint
 import server
 from sys import platform
 from selenium import webdriver
@@ -17,7 +15,7 @@ class Iris:
     json_file = object()
 
     def __init__(self):
-
+        
         # This heap of code checks for the os and sets the driver + query file path accordingly
         if platform == "darwin":
             Iris.driver = webdriver.Chrome(os.path.realpath('assets/chromedriver_mac'))
@@ -32,6 +30,8 @@ class Iris:
             print 'OS NOT COMPATIBLE, STOPPING SERVER.'
             exit()
 
+        Iris.get_answer("What's in the news?")
+
         while True:
             Iris.get_answer(raw_input("Ask user for something."))
 
@@ -41,12 +41,11 @@ class Iris:
 
     @staticmethod
     def get_answer(text):
-        Iris.driver.restart()
 
-        data = json.loads(Iris.fetch_from_nlp(text))
+        data = json.loads(Iris.fetch_from_nlp(text))["sentences"][0]
         main_entity = Iris.main_entity(data)
-        query_file = query_file = Iris.get_query_file(main_entity)
-
+        query_file = Iris.get_query_file(main_entity)
+        print("Main: " + main_entity)
         if query_file is not None:
             if Iris.get_location(data) is not None:
                 query.QueryHandler.get_json(query_file, 1, Iris.get_location(data))
@@ -55,9 +54,9 @@ class Iris:
         else:
             "Invalid query"
 
-
     @staticmethod
     def fetch_from_nlp(text):
+        Iris.driver.get("http://nlp.stanford.edu:8080/corenlp/process")
         element_select = Iris.driver.find_element_by_name('outputFormat')
         element_select.send_keys('json')
         element_text = Iris.driver.find_element_by_name('input')
@@ -68,33 +67,35 @@ class Iris:
         return element_out.text
 
     @staticmethod
-    def is_query(data):
-        first_word = data["sentences"][0]["tokens"][0]["word"].lower()
+    def root_entity(data):
+        for entity in data["basic-dependencies"]:
+            if entity["dep"] == "ROOT":
+                return entity
 
-        if first_word == "the":
-            return False
+    @staticmethod
+    def get_children(data, index):
+        return [entity for entity in data["basic-dependencies"]
+                if entity["governor"] == index]
 
-        if first_word == "how" or first_word == "is":
-            return True
+    @staticmethod
+    def get_pos(data, index):
+        return data["tokens"][int(index) - 1]["pos"]
 
-        for obj in data["sentences"][0]["tokens"]:
-            if obj["word"].lower() == data["sentences"][0]["collapsed-dependencies"][0]["dependentGloss"].lower():
-                if (obj["pos"].lower() == "vbz" and obj["word"].lower() != "does") or (obj["pos"].lower() == "jj") or (obj["pos"].lower() == "vbg"):
-                    return False
-
-        for obj in data["sentences"][0]["collapsed-dependencies"]:
-            if obj["dep"].lower() == "expl":
-                return False
-
-        return True
+    @staticmethod
+    def get_word(data, index):
+        return data["tokens"][int(index) - 1]["word"]
 
     @staticmethod
     def main_entity(data):
-        for entity in data["sentences"][0]["basic-dependencies"]:
-            data_local = json.loads(json.dumps(entity))
-            if (data_local["dep"] == "nsubj" or data_local["dep"] == "dobj") and not Iris.is_location(data, entity["dependentGloss"]):
-                return entity["dependentGloss"]
-        return "NOT FOUND"
+        # Builds an array with the root's non wh-question children's words that have a query file object (Are known)
+        root_entity_viable_children = [Iris.get_word(data, entity["dependent"])
+                                       for entity in Iris.get_children(data, Iris.root_entity(data)["dependent"])
+                                       if Iris.get_pos(data, entity["dependent"]) not in ["WP"]
+                                       and Iris.get_query_file(Iris.get_word(data, entity["dependent"])) is not None]
+
+        if root_entity_viable_children:
+            return root_entity_viable_children[0]
+        return None
 
     @staticmethod
     def get_query_file(name):
@@ -103,14 +104,12 @@ class Iris:
             for alias in q["alias"]:
                 if alias.upper() == name.upper():
                     return q
-        return None
 
     @staticmethod
     def is_location(data, name):
         for sub_name in name.split():
-            for entity in data["sentences"][0]["tokens"]:
-                data_local = json.loads(json.dumps(entity))
-                if data_local["word"].upper() == sub_name.upper() and data_local["ner"] == "LOCATION":
+            for entity in data["tokens"]:
+                if entity["word"].upper() == sub_name.upper() and entity["ner"] == "LOCATION":
                     return True
         return False
 
@@ -118,7 +117,7 @@ class Iris:
     def get_location(data):
         location_string = None
 
-        for name in data["sentences"][0]["tokens"]:
+        for name in data["tokens"]:
             data_local = json.loads(json.dumps(name))
             last_location_index = -1
             if data_local["ner"] == "LOCATION":
